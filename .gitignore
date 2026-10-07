@@ -1,0 +1,12 @@
+node_modules
+dist
+dist-electron
+release
+*.log
+.DS_Store
+.env
+.env.*
+coverage
+.cursor
+src/**/*.js
+src/**/*.js.map
