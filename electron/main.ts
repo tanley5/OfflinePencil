@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from 'electron'
+import { app, BrowserWindow, ipcMain, nativeTheme } from 'electron'
 import path from 'node:path'
 import { LibraryStore } from './library/store'
 import type { LibraryIndex, PageDocument } from './types'
@@ -10,14 +10,20 @@ function libraryRoot(): string {
   return path.join(app.getPath('userData'), 'library')
 }
 
+function shellBackground(): string {
+  return nativeTheme.shouldUseDarkColors ? '#1c1917' : '#f7f4ef'
+}
+
 function createWindow() {
+  nativeTheme.themeSource = 'system'
+
   mainWindow = new BrowserWindow({
     width: 1280,
     height: 840,
     minWidth: 900,
     minHeight: 600,
     title: 'Pencil',
-    backgroundColor: '#f7f4ef',
+    backgroundColor: shellBackground(),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -120,6 +126,10 @@ app.whenReady().then(() => {
   store = new LibraryStore(libraryRoot())
   registerIpc()
   createWindow()
+
+  nativeTheme.on('updated', () => {
+    mainWindow?.setBackgroundColor(shellBackground())
+  })
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()

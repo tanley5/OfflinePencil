@@ -1,7 +1,19 @@
+import { useSyncExternalStore } from 'react'
 import type { TemplateId } from '../../shared/types'
 import { PAGE_TEMPLATES } from '../lib/templates'
+import { defaultInkColor, prefersDarkScheme } from '../lib/theme'
 import { PencilMark } from './PencilMark'
 import type { NoteEditorHandle } from './NoteEditor'
+
+function subscribeDark(cb: () => void) {
+  const mq = window.matchMedia('(prefers-color-scheme: dark)')
+  mq.addEventListener('change', cb)
+  return () => mq.removeEventListener('change', cb)
+}
+
+function getDarkSnapshot() {
+  return prefersDarkScheme()
+}
 
 type Props = {
   templateId: TemplateId
@@ -16,6 +28,8 @@ export function Toolbar({
   onTemplateChange,
   onPastePlain,
 }: Props) {
+  const isDark = useSyncExternalStore(subscribeDark, getDarkSnapshot, () => false)
+
   return (
     <header className="toolbar">
       <div className="brand">
@@ -71,7 +85,8 @@ export function Toolbar({
       <input
         type="color"
         aria-label="Text color"
-        defaultValue="#1c1917"
+        key={isDark ? 'dark' : 'light'}
+        defaultValue={defaultInkColor(isDark)}
         onChange={(e) => editor?.setColor(e.target.value)}
       />
       <div className="divider" />

@@ -124,4 +124,26 @@ describe('LibraryStore', () => {
     const leftovers = fs.readdirSync(pagesDir).filter((f) => f.endsWith('.tmp'))
     expect(leftovers).toEqual([])
   })
+
+  it('deletes a section and its page files', () => {
+    const { index } = store.load()
+    const notebookId = index.notebooks[0].id
+    const section = store.createSection(notebookId, 'Temp Section')
+    const pageId = section.pages[0].id
+
+    store.deleteSection(notebookId, section.id)
+    expect(
+      store.load().index.notebooks[0].sections.some((s) => s.id === section.id),
+    ).toBe(false)
+    expect(fs.existsSync(path.join(root, 'pages', `${pageId}.json`))).toBe(false)
+  })
+
+  it('deletes a notebook and keeps remaining notebooks', () => {
+    store.load()
+    const extra = store.createNotebook('Extra')
+    store.deleteNotebook(extra.id)
+    const reloaded = store.load()
+    expect(reloaded.index.notebooks.some((n) => n.id === extra.id)).toBe(false)
+    expect(reloaded.index.notebooks.length).toBeGreaterThanOrEqual(1)
+  })
 })
