@@ -2,6 +2,17 @@
 
 Offline-first Electron note-taking app with freeform pages, rich text, templates, and local JSON storage. No accounts, no cloud.
 
+## Features
+
+- **Notebooks → sections → pages** with create, rename, and delete
+- **Freeform canvas** — click anywhere to add moveable/resizable note containers
+- **Rich text** — headings, fonts, colors, bullets, numbers, and checkbox to-dos
+- **Paste plain** — `Cmd/Ctrl+Shift+V` strips formatting from clipboard text
+- **Page templates** — blank, lined paper, dotted grid, weekly planner
+- **System theme** — follows macOS/Windows/Linux light or dark appearance
+- **Export notes** — **File → Export Notes…** (`Cmd/Ctrl+E`) writes all pages as `.txt` files into `~/Downloads/pencil_notes.zip`
+- **Fully offline** — JSON library under Electron `userData` (no sync, no subscription)
+
 ## Requirements
 
 - [Node.js](https://nodejs.org/) **20+** (includes npm)
@@ -147,17 +158,24 @@ Prefer building one architecture for your machine (`--arm64` or `--x64`) unless 
 
 ## Export notes
 
-In the app menu: **File → Export Notes…** (shortcut `Cmd/Ctrl+E`).
+1. Open Pencil.
+2. Choose **File → Export Notes…** (or press `Cmd/Ctrl+E`).
+3. Pencil flushes any unsaved edits, then builds a zip of plain-text pages.
 
-This writes every page as a `.txt` file inside:
+**Output file**
+
+| OS | Path |
+|----|------|
+| macOS / Linux | `~/Downloads/pencil_notes.zip` |
+| Windows | `%USERPROFILE%\Downloads\pencil_notes.zip` |
+
+Inside the zip, each page is a `.txt` file at:
 
 ```
-~/Downloads/pencil_notes.zip
+NotebookName/SectionName/PageName.txt
 ```
 
-(Windows: `%USERPROFILE%\Downloads\pencil_notes.zip`)
-
-Zip paths look like `Notebook/Section/Page.txt`.
+Text includes headings, paragraphs, bullets, and checkbox lines (`[x]` / `[ ]`). A success dialog can open the Downloads folder location.
 
 ---
 
