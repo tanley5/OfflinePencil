@@ -62,11 +62,13 @@
     "@tiptap/extension-text-style": "^2.11.5",
     "@tiptap/extension-underline": "^2.11.5",
     "@tiptap/react": "^2.11.5",
-    "@tiptap/starter-kit": "^2.11.5"
+    "@tiptap/starter-kit": "^2.11.5",
+    "jszip": "^3.10.2"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
+    "@types/jszip": "^3.4.0",
     "@types/node": "^22.13.10",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",

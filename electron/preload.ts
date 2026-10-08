@@ -8,6 +8,11 @@ import type {
   SectionMeta,
 } from './types'
 
+export type ExportNotesResult = {
+  zipPath: string
+  pageCount: number
+}
+
 export type PencilApi = {
   load: () => Promise<LibrarySnapshot>
   getPage: (pageId: string) => Promise<PageDocument | null>
@@ -45,6 +50,8 @@ export type PencilApi = {
   ) => Promise<LibrarySnapshot>
   deleteNotebook: (notebookId: string) => Promise<LibrarySnapshot>
   setActive: (active: LibraryIndex['active']) => Promise<LibrarySnapshot>
+  exportNotes: () => Promise<ExportNotesResult>
+  onExportRequest: (handler: () => void) => () => void
 }
 
 const api: PencilApi = {
@@ -75,6 +82,14 @@ const api: PencilApi = {
   deleteNotebook: (notebookId) =>
     ipcRenderer.invoke('library:deleteNotebook', notebookId),
   setActive: (active) => ipcRenderer.invoke('library:setActive', active),
+  exportNotes: () => ipcRenderer.invoke('library:exportNotes'),
+  onExportRequest: (handler) => {
+    const listener = () => handler()
+    ipcRenderer.on('export:request', listener)
+    return () => {
+      ipcRenderer.removeListener('export:request', listener)
+    }
+  },
 }
 
 contextBridge.exposeInMainWorld('pencil', api)

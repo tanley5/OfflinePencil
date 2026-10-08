@@ -145,6 +145,22 @@ Prefer building one architecture for your machine (`--arm64` or `--x64`) unless 
 
 ---
 
+## Export notes
+
+In the app menu: **File → Export Notes…** (shortcut `Cmd/Ctrl+E`).
+
+This writes every page as a `.txt` file inside:
+
+```
+~/Downloads/pencil_notes.zip
+```
+
+(Windows: `%USERPROFILE%\Downloads\pencil_notes.zip`)
+
+Zip paths look like `Notebook/Section/Page.txt`.
+
+---
+
 ## Data (survives uninstall)
 
 Notes are **not** stored inside the app bundle. They live under Electron `userData`:

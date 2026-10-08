@@ -1,6 +1,15 @@
-import { app, BrowserWindow, ipcMain, nativeTheme } from 'electron'
+import {
+  app,
+  BrowserWindow,
+  Menu,
+  dialog,
+  ipcMain,
+  nativeTheme,
+  shell,
+} from 'electron'
 import path from 'node:path'
 import { LibraryStore } from './library/store'
+import { writeNotesZip } from './library/exportNotes'
 import type { LibraryIndex, PageDocument } from './types'
 
 let mainWindow: BrowserWindow | null = null
@@ -12,6 +21,47 @@ function libraryRoot(): string {
 
 function shellBackground(): string {
   return nativeTheme.shouldUseDarkColors ? '#1c1917' : '#f7f4ef'
+}
+
+function buildMenu() {
+  const template: Electron.MenuItemConstructorOptions[] = [
+    ...(process.platform === 'darwin'
+      ? [
+          {
+            label: app.name,
+            submenu: [
+              { role: 'about' as const },
+              { type: 'separator' as const },
+              { role: 'services' as const },
+              { type: 'separator' as const },
+              { role: 'hide' as const },
+              { role: 'hideOthers' as const },
+              { role: 'unhide' as const },
+              { type: 'separator' as const },
+              { role: 'quit' as const },
+            ],
+          },
+        ]
+      : []),
+    {
+      label: 'File',
+      submenu: [
+        {
+          label: 'Export Notes…',
+          accelerator: 'CmdOrCtrl+E',
+          click: () => {
+            mainWindow?.webContents.send('export:request')
+          },
+        },
+        { type: 'separator' },
+        process.platform === 'darwin' ? { role: 'close' } : { role: 'quit' },
+      ],
+    },
+    { role: 'editMenu' },
+    { role: 'viewMenu' },
+    { role: 'windowMenu' },
+  ]
+  Menu.setApplicationMenu(Menu.buildFromTemplate(template))
 }
 
 function createWindow() {
@@ -120,11 +170,32 @@ function registerIpc() {
     store.setActive(active)
     return store.load()
   })
+
+  ipcMain.handle('library:exportNotes', async () => {
+    const zipPath = path.join(app.getPath('downloads'), 'pencil_notes.zip')
+    const result = await writeNotesZip(store, zipPath)
+    if (mainWindow) {
+      const { response } = await dialog.showMessageBox(mainWindow, {
+        type: 'info',
+        buttons: ['Show in Folder', 'OK'],
+        defaultId: 1,
+        cancelId: 1,
+        title: 'Export complete',
+        message: `Exported ${result.pageCount} page(s) as text files.`,
+        detail: result.zipPath,
+      })
+      if (response === 0) {
+        shell.showItemInFolder(result.zipPath)
+      }
+    }
+    return result
+  })
 }
 
 app.whenReady().then(() => {
   store = new LibraryStore(libraryRoot())
   registerIpc()
+  buildMenu()
   createWindow()
 
   nativeTheme.on('updated', () => {

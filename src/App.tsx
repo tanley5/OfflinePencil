@@ -86,6 +86,17 @@ export default function App() {
   }, [refresh])
 
   useEffect(() => {
+    return api().onExportRequest(() => {
+      void (async () => {
+        saver.current.flush()
+        const page = pageRef.current
+        if (page) await api().savePage(page)
+        await api().exportNotes()
+      })()
+    })
+  }, [])
+
+  useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if (e.key === 'Escape') setSelectedId(null)
       const mod = e.metaKey || e.ctrlKey
